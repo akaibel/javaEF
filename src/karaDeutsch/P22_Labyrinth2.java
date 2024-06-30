@@ -43,6 +43,8 @@ public class P22_Labyrinth2 extends KaraProgramm {
 	/**
 	 * Kara soll das Labyrinth durchlaufen und auf dem Pilz stehen bleiben.
 	 * Dabei kann Kara auf jedem Feld, das sie besucht hat, ein Blatt hinlegen.
+	 * Man muss dafuer eine rekursive Methode programmieren, z.B.:
+	 * private boolean suchePilzAufFeld()
 	 */
 	public void meinProgramm() {
 		ausgeben("meinProgramm: Labyrinth2");

@@ -36,6 +36,11 @@ public class ArrayTest {
 		return -1;
 	}
 	
+	public int groessteZahl() {
+		//TODO
+		return -1;
+	}
+	
 	public int haeufigsteZahl() {
 		//TODO
 		return -1;

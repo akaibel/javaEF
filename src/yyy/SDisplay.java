@@ -26,7 +26,7 @@ public class SDisplay {
 	private Configuration configuration;
 	    
     /**
-     * here the images of each cell are stored.
+     * here the images of each cell are stored. 
      */
     private ImageLabel[][] imageLabelGrid;
     

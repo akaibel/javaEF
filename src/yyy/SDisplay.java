@@ -26,7 +26,7 @@ public class SDisplay {
 	private Configuration configuration;
 	    
     /**
-     * here the images of each cell are stored. 
+     * here the images of each cell are stored.
      */
     private ImageLabel[][] imageLabelGrid;
     
@@ -145,6 +145,9 @@ public class SDisplay {
 	        speedSlider.setPaintTicks(false);
 	        speedSlider.setPaintLabels(false);
 	        speedSlider.addChangeListener(e -> speedChanged(speedSlider.getValue()));
+	    	String speedString = Properties.readProperty("speed");
+	    	int speed = speedString==null?50:Integer.parseInt(speedString);
+	    	speedSlider.setValue(speed);
 	        JPanel sliderPanel = new JPanel();
 	        sliderPanel.add(speedSlider);	
 	        frame.add(sliderPanel, BorderLayout.SOUTH);
@@ -516,6 +519,7 @@ public class SDisplay {
         //value is in the interval 0..100
 		//waitingtime should be in the interval 10..1000
 		waitingTime = (int)(1000-value*9.9);		
+		Properties.saveProperty("speed", ""+value);
     }
 
 	public JFrame getFrame() {

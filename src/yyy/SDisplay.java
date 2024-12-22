@@ -38,7 +38,7 @@ public class SDisplay {
     /**
      * this thread is responsible for running the program (written by the user)
      */
-	private Thread programThread;
+	private ProgramThread programThread;
 	
 	/**
 	 * time that elapses between each step of the program written by the user.
@@ -233,27 +233,9 @@ public class SDisplay {
     public void startNewProgramThread(){
     	//System.out.println("startNewProgramThread");
     	if(programThread != null) {
-    		programThread.stop();    		
+    		programThread.stopProgram();    		
     	}
-		programThread = new Thread(new Runnable() {
-			public void run() {
-				try {
-					initGuiLatch.await();
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-				while(!program.isRunning()) {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-		        program.meinProgramm();
-		        program.show("Das Programm ist fertig!");
-		        
-			}			
-		});
+		programThread = new ProgramThread();
 		programThread.start();
     }
 
@@ -538,5 +520,35 @@ public class SDisplay {
 
 	public JFrame getFrame() {
 		return frame;
+	}
+	
+	private class ProgramThread extends Thread{
+		private boolean isActive;
+		
+		public ProgramThread() {
+			isActive = true;
+		}
+		
+		public void run() {
+			try {
+				initGuiLatch.await();
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+			while(!program.isRunning() && isActive) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+	        program.meinProgramm();
+	        program.show("Das Programm ist fertig!");   
+		}			
+		
+		public void stopProgram() {
+			isActive = false;
+		}
+		
 	}
 }

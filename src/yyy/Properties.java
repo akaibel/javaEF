@@ -78,19 +78,5 @@ public class Properties {
         return null; // Property not found
     }
 
-    public static void main(String[] args) {
-        Properties properties = new Properties();
-
-        // Example usage
-        properties.saveProperty("speed", "75"); // Save or update speed property
-        String speed = properties.readProperty("speed"); // Read speed property
-
-        System.out.println("Speed from config: " + speed);
-
-        // Example with another property
-        properties.saveProperty("volume", "50");
-        String volume = properties.readProperty("volume");
-        System.out.println("Volume from config: " + volume);
-    }
 }
 

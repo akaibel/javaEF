@@ -6,8 +6,11 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +36,7 @@ public class SDisplay {
     /**
      * the program (written by the user) that will executed.
      */
-    private SProgrammContainer program;
+    private SProgrammContainer programContainer;
 
     /**
      * this thread is responsible for running the program (written by the user)
@@ -45,7 +48,6 @@ public class SDisplay {
 	 */
 	private int waitingTime;
 	
-
     
     /**
      * the objects that are displayed
@@ -62,12 +64,16 @@ public class SDisplay {
      */
     private CountDownLatch initGuiLatch;
 	
-	/**
-	 * whether the display is currently resetting
-	 */
-	private boolean resetting;
 	
 	private Map<SActor,SPosition> actor_position_map;
+
+	private JButton startButton;
+
+	private JButton stopButton;
+
+	private JButton resetButton;
+	
+	private static Point FRAME_LOCATION = null;
 	
     
     public SDisplay(SProgrammContainer programmContainer) {
@@ -86,7 +92,7 @@ public class SDisplay {
     public void initLogic(SProgrammContainer programmContainer) {
     	//System.out.println("initLogic");
     	this.actor_position_map = new HashMap<>();
-    	this.program = programmContainer;
+    	this.programContainer = programmContainer;
 		SGrid grid = new SGrid(programmContainer.landkarte(),programmContainer.getProgram().configuration());
 		if(programmContainer.getActor() != null) {
 			programmContainer.getActor().reset();	
@@ -120,9 +126,9 @@ public class SDisplay {
 	        // create the buttons and add them to the frame
 	        JPanel buttonPanel = new JPanel();
 	
-	        JButton startButton = new JButton("Start");
-	        JButton stopButton = new JButton("Stop");
-	        JButton resetButton = new JButton("Reset");
+	        startButton = new JButton("Start");
+	        stopButton = new JButton("Stop");
+	        resetButton = new JButton("Reset");
 	        
 	        startButton.addActionListener(e -> start());
 	        stopButton.addActionListener(e -> stop());
@@ -163,20 +169,32 @@ public class SDisplay {
 	
 	        // Set the frame size
 	        frame.setSize(new Dimension(frameWidth, frameHeight));
-	
-	        // Center the frame on the screen
-	        frame.setLocationRelativeTo(null);
+
+	        if(FRAME_LOCATION != null) {
+	        	frame.setLocation(FRAME_LOCATION);
+	        }
+	        else {
+	        	// Center the frame on the screen
+	        	frame.setLocationRelativeTo(null);
+	        }
 
 	        // Make the frame visible
 	        frame.setVisible(true);
 	        frame.setResizable(false);
+
 	        
+	        frame.addComponentListener(new ComponentAdapter() {
+	            @Override
+	            public void componentMoved(ComponentEvent e) {
+	                FRAME_LOCATION = frame.getLocation();
+	            }
+	        });	        
 	        // needed to handle deiconifying the window.
 	        frame.addWindowStateListener(new WindowStateListener() {
 	            @Override
 	            public void windowStateChanged(WindowEvent e) {
 	                if ((e.getNewState() & JFrame.ICONIFIED) == JFrame.ICONIFIED) {
-	                	program.stop();
+	                	programContainer.stop();
 	                }
 	                if ((e.getNewState() & JFrame.NORMAL) == JFrame.NORMAL) {
 	                    new Thread(new Runnable() {
@@ -188,7 +206,7 @@ public class SDisplay {
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
-	                            	displayActor(program.getActor());
+	                            	displayActor(programContainer.getActor());
 	                        }
 	                    }).start();	                    
 	                }
@@ -208,15 +226,15 @@ public class SDisplay {
                 initGuiLatch.await();
                 // set latch for program to be started
                 initGuiLatch = new CountDownLatch(1);
-                if(program.getActor() == null) {
+                if(programContainer.getActor() == null) {
                 	return;
                 }
-                int x = program.getActor().getPosition().getX();
-                int y = program.getActor().getPosition().getY();
+                int x = programContainer.getActor().getPosition().getX();
+                int y = programContainer.getActor().getPosition().getY();
     	    	if (isValidCoordinate(x, y)) {
-    	    		this.actor_position_map.put(program.getActor(), program.getActor().getPosition().copy());
+    	    		this.actor_position_map.put(programContainer.getActor(), programContainer.getActor().getPosition().copy());
     	    		SwingUtilities.invokeLater(() -> { 
-    	    			imageLabelGrid[y][x].displayActor(program.getActor().getDirection());
+    	    			imageLabelGrid[y][x].displayActor(programContainer.getActor().getDirection());
     	    		});
     	        }
     	    	else {
@@ -236,7 +254,7 @@ public class SDisplay {
     public void startNewProgramThread(){
     	//System.out.println("startNewProgramThread");
     	if(programThread != null) {
-    		programThread.stopProgram();    		
+    		System.out.println("SDisplay.startNewProgramThread(): \nprogramThread is not null!\n that should not be!!");
     	}
 		programThread = new ProgramThread();
 		programThread.start();
@@ -316,8 +334,8 @@ public class SDisplay {
                 g.drawImage(overlay, 0, 0, getWidth(), getHeight(), this);
             }
             // display Actor only in case rotation is not -1.
-            if (rotation != -1 && program.getActor() != null) {
-                this.actorImage = configuration.actorImageMap().get(program.getActor().getColor());
+            if (rotation != -1 && programContainer.getActor() != null) {
+                this.actorImage = configuration.actorImageMap().get(programContainer.getActor().getColor());
                 if(this.actorImage == null) {
                 	System.out.println("actorImage is null");
                 }
@@ -381,6 +399,7 @@ public class SDisplay {
      * @param SActor
      */
     public void displayActor(SActor actor) {
+//    	System.out.println("displayActor");
     	if(imageLabelGrid == null) {
     		return;
     	}
@@ -393,6 +412,8 @@ public class SDisplay {
 		    		removeActor(actor_position_map.get(actor));
 		    		actor_position_map.put(actor, new SPosition(x,y));
 		            imageLabelGrid[y][x].displayActor(direction);
+		            //System.out.println("make frame visible");
+
 		        }
 		    	else {
 		    		JOptionPane.showMessageDialog(frame, "unmoegliche Position fuer Actor:\n"+x+","+y);
@@ -418,11 +439,15 @@ public class SDisplay {
      */
     private void removeActor(SPosition position) {
     	//System.out.println("removeActor("+x+","+y+")");
-        int x = position.getX();
-        int y = position.getY();
-    	if (isValidCoordinate(x, y)) {
-            imageLabelGrid[y][x].removeActor();
-        }
+        try {
+			int x = position.getX();
+			int y = position.getY();
+			if (isValidCoordinate(x, y)) {
+			    imageLabelGrid[y][x].removeActor();
+			}
+		} catch (Exception e) {
+			System.out.println("NullpointerException in SDisplay.removeActor(SPosition position).");
+		}
     }
 
     /**
@@ -450,7 +475,7 @@ public class SDisplay {
     	if(obj != configuration.empty()) {
     		overlayImage = configuration.objectImageMap().get(obj);   
     	}
-    	boolean showActor = (program.getActor().getPosition().equals(position));
+    	boolean showActor = (programContainer.getActor().getPosition().equals(position));
     	imageLabelGrid[row][col].updateOverlay(overlayImage, showActor);
     }
     
@@ -472,7 +497,6 @@ public class SDisplay {
 		try {
 			Thread.sleep(waitingTime);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
 	}
@@ -481,34 +505,40 @@ public class SDisplay {
      * called when start-Button is pressed.
      */
     private void start() {
-    	if(!resetting)
-    		program.start();
+    		programContainer.start();
     }
 
     /**
      * called when stop-Button is pressed.
      */
     private void stop() {
-    	if(!resetting)
-    		program.stop();
+    		programContainer.stop();
+    }
+    
+    public void setButtonsEnabled(boolean value) {
+    	this.startButton.setEnabled(value);
+    	this.stopButton.setEnabled(value);
+    	this.resetButton.setEnabled(value);   	
     }
     
     /**
      * called when reset-Button is pressed.
      */
     public void reset() {
-    	resetting = true;
-    	//stop the thread executing the program (written by the user)
-    	programThread.stop();
-    	initLogic(program);
-    	updateAllCells();
-    	//display Actor - this ensures pointing in the right direction.
-		this.displayActor(program.getActor());
-    	//start a new thread that allows executing the program (written by the user)
-        startNewProgramThread();
-        // reduce initGuiLatch to zero, so the program execution can start.
-        initGuiLatch.countDown();
-        resetting = false;	
+    	programContainer.stop();
+    	this.getFrame().setVisible(false);
+    	SProgramm newProgram = this.programContainer.getProgram().createNewInstance();
+    	//Display the actor - must be done in a seperate Thread
+    	Thread displayActorThread = new Thread(() -> {
+            try {
+            	//TODO improve this! the actor should be displayed as soon as everything is ready.
+            	Thread.sleep(300);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+        	newProgram.getProgrammContainer().getDisplay().displayActor(newProgram.getProgrammContainer().getActor());
+        });
+        displayActorThread.start();
     }
 
     /**
@@ -527,10 +557,8 @@ public class SDisplay {
 	}
 	
 	private class ProgramThread extends Thread{
-		private boolean isActive;
 		
 		public ProgramThread() {
-			isActive = true;
 		}
 		
 		public void run() {
@@ -539,20 +567,16 @@ public class SDisplay {
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}
-			while(!program.isRunning() && isActive) {
+			while(!programContainer.isRunning()) {
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
-	        program.meinProgramm();
-	        program.show("Das Programm ist fertig!");   
+	        programContainer.meinProgramm();
+	        programContainer.show("Das Programm ist fertig!");   
 		}			
-		
-		public void stopProgram() {
-			isActive = false;
-		}
 		
 	}
 }

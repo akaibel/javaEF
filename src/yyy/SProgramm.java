@@ -37,6 +37,16 @@ public abstract class SProgramm {
 		return this.sProgrammContainer;
 	}
 
+    // Method to create a new instance of the same subtype
+    public SProgramm createNewInstance() {
+        try {
+        	SProgramm sProgrammNew = this.getClass().getDeclaredConstructor().newInstance();
+        	//sProgrammNew.sProgrammContainer.getDisplay().updateAllCells();
+        	return sProgrammNew;
+        } catch (Exception e) {
+            throw new RuntimeException("SProgramm.createNewInstance(): Cannot create new instance", e);
+        }
+    }
 	
 
 }

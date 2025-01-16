@@ -27,7 +27,7 @@ public class Baum
 		krone.bewegeZuPosition(30,50);
 		krone.groesseAendern(50);
 		krone.farbeAendern("gruen");
-		
+
 		istRot = false;
 
 		sichtbarMachen();
@@ -67,5 +67,5 @@ public class Baum
 		}
 		return ergebnis;
 	}
-	
+
 }	// Ende der Klasse. HIER NICHTS MEHR DRUNTER SCHREIBEN

@@ -7,7 +7,7 @@ public class SActor {
 	private SPosition position_start;
 	private int direction, direction_start;
 	private SProgrammContainer programContainer;
-	private Configuration configuration;
+	private AbstractDisplay configuration;
 	private String color;
 	
 	public static final int RIGHT = 0;

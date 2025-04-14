@@ -33,7 +33,12 @@ public class P01_BlaetterSammeln extends KaraProgramm{
 	 */
 	public void meinProgramm() {
 		print("meinProgramm: Blaetter sammeln");
-		//TODO
+		while(kara.treeFront() == false) {
+			if(kara.onLeaf() == true) {
+				kara.removeLeaf();
+			}
+			kara.move();
+		}
 		
 	} // Ende meinProgramm()
 	

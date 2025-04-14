@@ -1,8 +1,9 @@
 package arrays;
 
 import java.util.Random;
+
+import gui.GUI;
 import yyy.array.ArrayViewer;
-import yyy.oop.GUI;
 
 
 public class Sortieren {

@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
  *
  */
 public class SGrid {
-	private Configuration configuration;
+	private AbstractDisplay configuration;
 
 	public int size_x;
 	public int size_y;
@@ -18,7 +18,7 @@ public class SGrid {
 	private char[][] objects;
 	
 	
-	public SGrid(String[] landscape, Configuration configuration) {
+	public SGrid(String[] landscape, AbstractDisplay configuration) {
 		this.configuration = configuration;
 		this.setObjects(landscape);
 	}

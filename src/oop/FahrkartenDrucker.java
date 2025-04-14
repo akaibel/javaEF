@@ -5,6 +5,7 @@ import java.awt.Font;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 
+import gui.GUI;
 import yyy.oop.*;
 
 public class FahrkartenDrucker {

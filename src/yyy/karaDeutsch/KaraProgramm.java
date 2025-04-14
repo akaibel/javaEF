@@ -5,7 +5,7 @@ import yyy.SProgramm;
 public abstract class KaraProgramm extends SProgramm {
 	
 	public KaraProgramm() {
-		super(new KaraConfiguration());
+		super(new KaraDisplay());
 	}
 	
 

@@ -26,7 +26,7 @@ import javax.swing.SwingUtilities;
 
 
 public class SDisplay {
-	private Configuration configuration;
+	private AbstractDisplay configuration;
 	    
     /**
      * here the images of each cell are stored.
@@ -77,6 +77,7 @@ public class SDisplay {
 	
     
     public SDisplay(SProgrammContainer programmContainer) {
+    	_config.Configuration.READ_AND_START_UPDATING_CONFIGURATION();
     	this.configuration = programmContainer.getProgram().configuration();
     	programmContainer.setDisplay(this);
     	initLogic(programmContainer);
@@ -151,8 +152,7 @@ public class SDisplay {
 	        speedSlider.setPaintTicks(false);
 	        speedSlider.setPaintLabels(false);
 	        speedSlider.addChangeListener(e -> speedChanged(speedSlider.getValue()));
-	    	String speedString = Properties.readProperty("speed");
-	    	int speed = speedString==null?50:Integer.parseInt(speedString);
+	    	int speed = _config.Configuration.SPEED;
 	    	speedSlider.setValue(speed);
 	        JPanel sliderPanel = new JPanel();
 	        sliderPanel.add(speedSlider);	
@@ -549,7 +549,7 @@ public class SDisplay {
         //value is in the interval 0..100
 		//waitingtime should be in the interval 10..1000
 		waitingTime = (int)(1000-value*9.9);		
-		Properties.saveProperty("speed", ""+value);
+		_config.Configuration.SPEED = value;
     }
 
 	public JFrame getFrame() {

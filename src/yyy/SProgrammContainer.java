@@ -15,7 +15,7 @@ public class SProgrammContainer {
 	
 	private SProgramm sProgramm;
 	
-	private Configuration configuration;
+	private AbstractDisplay configuration;
 	
 	public SProgrammContainer(SProgramm sprogramm) {
 		this.sProgramm = sprogramm;

@@ -1,5 +1,7 @@
 package yyy.oop;
 
+import gui.GUI;
+
 public class FormenTest {
 
 	public FormenTest() {

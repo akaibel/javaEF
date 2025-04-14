@@ -6,9 +6,9 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import yyy.Configuration;
+import yyy.AbstractDisplay;
 
-public class RoverConfiguration extends Configuration {
+public class RoverDisplay extends AbstractDisplay {
 	public static String IMAGE_PATH = "images\\rover\\";
 
 	public static final char ACTOR = 'a';
@@ -42,7 +42,7 @@ public class RoverConfiguration extends Configuration {
       OBJECT_IMAGE_MAP.put(OBJECT_C, new ImageIcon(IMAGE_PATH+"gesteinRot.png").getImage());
   }
     
-  	public RoverConfiguration() {
+  	public RoverDisplay() {
   		super.setCellSize(50);
   	}
   

@@ -5,7 +5,13 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-public abstract class Configuration {
+/**
+ * Die Abstraktion eines Displays
+ * Die passt sowohl auf Kara als auch auf den Rover.
+ * @author akaib
+ *
+ */
+public abstract class AbstractDisplay {
 	private int cellSize = 28;
 	
 	public abstract String programName();

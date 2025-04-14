@@ -2,9 +2,9 @@ package yyy;
 
 public abstract class SProgramm {
 	private SProgrammContainer sProgrammContainer;
-	private Configuration configuration;
+	private AbstractDisplay configuration;
 	
-	public SProgramm(Configuration configuration) {
+	public SProgramm(AbstractDisplay configuration) {
 		this.configuration = configuration;
 		sProgrammContainer = new SProgrammContainer(this);
 	}
@@ -21,7 +21,7 @@ public abstract class SProgramm {
 	 */
 	public abstract String[] landkarte();
 		
-	public Configuration configuration() {
+	public AbstractDisplay configuration() {
 		return configuration;
 	}
 	

@@ -4,8 +4,12 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
@@ -21,8 +25,8 @@ import javax.swing.JPanel;
 
 /**
  * Leinwand ist eine Klasse, die einfache Zeichenoperationen auf einer
- * leinwandartigen Zeichenfläche ermöglicht. Sie ist eine vereinfachte Version
- * der Klasse Canvas (englisch für Leinwand) des JDK und wurde speziell für das
+ * leinwandartigen Zeichenflaeche ermoeglicht. Sie ist eine vereinfachte Version
+ * der Klasse Canvas (englisch fuer Leinwand) des JDK und wurde speziell fuer das
  * Projekt "Figuren" geschrieben.
  * 
  * 
@@ -34,39 +38,30 @@ import javax.swing.JPanel;
  */
 public class Leinwand {
 	// Hinweis: Die Implementierung dieser Klasse (insbesondere die
-	// Verwaltung der Farben und Identitäten der Figuren) ist etwas
+	// Verwaltung der Farben und Identitaeten der Figuren) ist etwas
 	// komplizierter als notwendig. Dies ist absichtlich so, weil damit
 	// die Schnittstellen und Exemplarvariablen der Figuren-Klassen
-	// für den Lernanspruch dieses Projekts einfacher und klarer
-	// sein können.
+	// fuer den Lernanspruch dieses Projekts einfacher und klarer
+	// sein koennen.
 
 	private static Leinwand leinwandSingleton;
 	
-	private static int grafikUpdateIntervallInMs = Config.grafikUpdateIntervallInMs;
-	private static int sizeX = Config.sizeX;
-	private static int sizeY = Config.sizeY;
+	private static int grafikUpdateIntervallInMs = _config.Configuration.OOP_GRAFIK_UPDATE_IN_MS;
 
 	/**
 	 * Fabrikmethode, die eine Referenz auf das einzige Exemplar dieser Klasse
-	 * zurückliefert. Wenn es von einer Klasse nur genau ein Exemplar gibt, wird
+	 * zurueckliefert. Wenn es von einer Klasse nur genau ein Exemplar gibt, wird
 	 * dieses als 'Singleton' bezeichnet.
 	 */
 	public static Leinwand gibLeinwand() {
 		if (leinwandSingleton == null) {
-			leinwandSingleton = new Leinwand("", sizeX, sizeY,
-					Color.white);
+			leinwandSingleton = new Leinwand("", Color.white);
 		}
 		leinwandSingleton.setzeSichtbarkeit(true);
 		return leinwandSingleton;
 	}
 	
-	public static int width(){
-		return sizeX;
-	}
-	
-	public static int height(){
-		return sizeY;
-	}
+
 
 
 
@@ -95,65 +90,47 @@ public class Leinwand {
 	 * 
 	 * @param titel
 	 *            Titel, der im Rahmen der Leinwand angezeigt wird
-	 * @param breite
-	 *            die gewünschte Breite der Leinwand
-	 * @param hoehe
-	 *            die gewünschte Höhe der Leinwand
 	 * @param grundfarbe
 	 *            die Hintergrundfarbe der Leinwand
 	 */
-	private Leinwand(String titel, int breite, int hoehe, Color grundfarbe) {
-		fenster = new JFrame();
+	private Leinwand(String titel, Color grundfarbe) {
+		_config.Configuration.READ_AND_START_UPDATING_CONFIGURATION();
+
 		zeichenflaeche = new Zeichenflaeche();
+		zeichenflaeche.setPreferredSize(new Dimension(_config.Configuration.OOP_LEINWAND_BREITE, _config.Configuration.OOP_LEINWAND_HOEHE));
+		hintergrundfarbe = grundfarbe;
+
+		fenster = new JFrame();
 		fenster.setContentPane(zeichenflaeche);
 		fenster.setTitle(titel);
-		zeichenflaeche.setPreferredSize(new Dimension(breite, hoehe));
-		hintergrundfarbe = grundfarbe;
-		fenster.addWindowListener(new WindowListener(){
-
-			
-			public void windowActivated(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			
+		fenster.setLocation(_config.Configuration.OOP_LEINWAND_POS_X, _config.Configuration.OOP_LEINWAND_POS_Y);
+		fenster.addWindowListener(new WindowAdapter(){
 			public void windowClosed(WindowEvent arg0) {
-				System.exit(0);
-				
+				System.exit(0);				
 			}
-
-			
 			public void windowClosing(WindowEvent arg0) {
-				System.exit(0);
-				
+				System.exit(0);				
 			}
-
-			
-			public void windowDeactivated(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			
-			public void windowDeiconified(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			
-			public void windowIconified(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			
-			public void windowOpened(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
 		});
+        // ComponentListener for move and resize
+        fenster.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                Point location = fenster.getLocation();
+                //System.out.println("Window moved to: " + location.x + ", " + location.y);
+                _config.Configuration.OOP_LEINWAND_POS_X = location.x;
+                _config.Configuration.OOP_LEINWAND_POS_Y = location.y;              
+            }
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                Dimension size = fenster.getSize();
+                //System.out.println("Window resized to: " + size.width + "x" + size.height);
+                _config.Configuration.OOP_LEINWAND_BREITE = size.width;
+                _config.Configuration.OOP_LEINWAND_HOEHE = size.height;
+            }
+        });
+
 		fenster.pack();
 		figuren = new ArrayList<Object>();
 		figurZuShape = new HashMap<Object, ShapeMitFarbe>();
@@ -172,12 +149,12 @@ public class Leinwand {
 	 * Leinwandfenster in den Vordergrund (vor andere Fenster) zu holen.
 	 * 
 	 * @param sichtbar
-	 *            boolean für die gewünschte Sichtbarkeit: true für sichtbar,
-	 *            false für nicht sichtbar.
+	 *            boolean fuer die gewuenschte Sichtbarkeit: true fuer sichtbar,
+	 *            false fuer nicht sichtbar.
 	 */
 	public void setzeSichtbarkeit(boolean sichtbar) {
 		if (graphic == null) {
-			// erstmaliger Aufruf: erzeuge das Bildschirm-Image und fülle
+			// erstmaliger Aufruf: erzeuge das Bildschirm-Image und fuelle
 			// es mit der Hintergrundfarbe
 			Dimension size = zeichenflaeche.getSize();
 			leinwandImage = zeichenflaeche.createImage(size.width, size.height);
@@ -190,20 +167,20 @@ public class Leinwand {
 	}
 
 	/**
-	 * Zeichne für das gegebene Figur-Objekt eine Java-Figur (einen Shape) auf
+	 * Zeichne fuer das gegebene Figur-Objekt eine Java-Figur (einen Shape) auf
 	 * die Leinwand.
 	 * 
 	 * @param figur
-	 *            das Figur-Objekt, für das ein Shape gezeichnet werden soll
+	 *            das Figur-Objekt, fuer das ein Shape gezeichnet werden soll
 	 * @param farbe
 	 *            die Farbe der Figur
 	 * @param shape
-	 *            ein Objekt der Klasse Shape, das tatsächlich gezeichnet wird
+	 *            ein Objekt der Klasse Shape, das tatsaechlich gezeichnet wird
 	 */
 	public void zeichne(Object figur, String farbe, Shape shape) {
 		synchronized(figuren){
 			figuren.remove(figur); // entfernen, falls schon eingetragen
-			figuren.add(figur); // am Ende hinzufügen
+			figuren.add(figur); // am Ende hinzufuegen
 			figurZuShape.put(figur, new ShapeMitFarbe(shape, farbe));
 		}
 		//erneutZeichnen();
@@ -250,12 +227,12 @@ public class Leinwand {
 	}
 
 	/**
-	 * Warte für die angegebenen Millisekunden. Mit dieser Operation wird eine
-	 * Verzögerung definiert, die für animierte Zeichnungen benutzt werden kann.
+	 * Warte fuer die angegebenen Millisekunden. Mit dieser Operation wird eine
+	 * Verzoegerung definiert, die fuer animierte Zeichnungen benutzt werden kann.
 	 */
 	public void warte() {
 		try {
-			Thread.sleep(Config.WARTEZEIT_FORMEN);
+			Thread.sleep(_config.Configuration.OOP_WARTEZEIT_FORMEN);
 		} catch (Exception e) {
 			// Exception ignorieren
 		}
@@ -278,7 +255,7 @@ public class Leinwand {
 	}
 
 	/**
-	 * Lösche die gesamte Leinwand.
+	 * Loesche die gesamte Leinwand.
 	 */
 	private void loeschen() {
 		while(graphic == null){
@@ -296,9 +273,9 @@ public class Leinwand {
 	}
 
 	/***************************************************************************
-	 * Interne Klasse Zeichenflaeche - die Klasse für die GUI-Komponente, die
-	 * tatsächlich im Leinwand-Fenster angezeigt wird. Diese Klasse definiert
-	 * ein JPanel mit der zusätzlichen Möglichkeit, das auf ihm gezeichnet Image
+	 * Interne Klasse Zeichenflaeche - die Klasse fuer die GUI-Komponente, die
+	 * tatsaechlich im Leinwand-Fenster angezeigt wird. Diese Klasse definiert
+	 * ein JPanel mit der zusaetzlichen Moeglichkeit, das auf ihm gezeichnet Image
 	 * aufzufrischen (erneut zu zeichnen).
 	 */
 	private class Zeichenflaeche extends JPanel {
@@ -311,7 +288,7 @@ public class Leinwand {
 
 	/***************************************************************************
 	 * Interne Klasse ShapeMitFarbe - Da die Klasse Shape des JDK nicht auch
-	 * eine Farbe mitverwalten kann, muss mit dieser Klasse die Verknüpfung
+	 * eine Farbe mitverwalten kann, muss mit dieser Klasse die Verknuepfung
 	 * modelliert werden.
 	 */
 	private class ShapeMitFarbe {
@@ -326,7 +303,7 @@ public class Leinwand {
 
 		public void draw(Graphics2D graphic) {
 			setzeZeichenfarbe(farbe);
-			if(Config.formenFuellen){
+			if(_config.Configuration.OOP_FORMEN_FUELLEN != 0){
 				graphic.fill(shape);
 			}
 			graphic.draw(shape);

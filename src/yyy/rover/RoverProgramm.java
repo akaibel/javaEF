@@ -5,7 +5,7 @@ import yyy.SProgramm;
 public abstract class RoverProgramm extends SProgramm {
 	
 	public RoverProgramm() {
-		super(new RoverConfiguration());
+		super(new RoverDisplay());
 	}
 	
 

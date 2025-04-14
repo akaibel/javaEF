@@ -1,5 +1,4 @@
-package yyy.oop;
-
+package gui;
 
 
 
@@ -8,11 +7,15 @@ package yyy.oop;
  * Siebengebirgsgymnasium Bad Honnef
  * a.kaibel@googlemail.com
  */
-
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
@@ -26,14 +29,20 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Vector;
 
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
 import javax.swing.BoxLayout;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JTextArea;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 
-import yyy.oop.Configuration;
+import _config.Configuration;
 
 /**
  * eine Benutzeroberflaeche fuer Objekte beliebiger Klassen.
@@ -41,177 +50,236 @@ import yyy.oop.Configuration;
  *
  */
 public class GUI extends JFrame {
-  private static final long serialVersionUID = 4380161375242238507L;
-  private static final int maxAnzahlBuchstaben = 30;
-  private static final int maxAnzahlZeilen = 20;
+    private static final long serialVersionUID = 4380161375242238507L;
+    private static final int maxAnzahlBuchstaben = 30;
+    private static final int maxAnzahlZeilen = 20;
+    
+    public static Vector<GUI> alleGUIs = new Vector<>();
 
-  public static Vector<GUI> alleGUIs = new Vector<GUI>();
+    protected Object dasObjekt;
+    protected String klassenNameMitPackage;
+    protected SchriftgroessenLabel[] fieldLabels;
+    private Field[] fields;
+    
+    private Vector<SchriftgroessenLabel> labelVector;
+    
+    private static String linie = "-----------------------";
+    
+    /**
+     * x-Position des ersten GUI Fensters
+     */
+    private static int xPositionFirst=-1;
+    
+    /**
+     * x-Position des naechsten GUI Fenster, das erzeugt wird
+     */
+    private static int xPosition;
+    /**
+     * y-Position von allen GUI-Fenstern
+     */
+    private static int yPosition;
+    
+    private boolean methodeInAusfuehrung;
 
-  /**
-   * das Objekt, dessen Attribute und Methoden dargestellt werden.
-   */
-  protected Object dasObjekt;
+    private JSlider speedSlider;
+	private static final int WARTEZEITSLIDER_PREFERRED_WIDTH = 50;
 
-  /**
-   * der Klassenname von dasObjekt, mit Package
-   */
-  protected String klassenNameMitPackage;
-
-  /**
-   * die Labels, in denen die Attribute dargestellt werden
-   */
-  protected SchriftgroessenLabel[] fieldLabels;
-
-  /**
-   * die Attribute
-   */
-  private Field[] fields;
-
-  /**
-   * alle Labels, die in der GUI erscheinen
-   * wichtig fuer das veraendern der Schriftgroesse
-   */
-  private Vector<SchriftgroessenLabel> labelVector;
-  private int fontSize = Configuration.FONT_SIZE;
-
-  /**
-   * Trennlinie
-   */
-  private static String linie = "-----------------------";
-
-  private static int xPosition = 100;
-  private static int yPosition = 300;
-
-  private boolean methodeInAusfuehrung;
-
-  /**
-   * erzeugt eine Bedienungsoberflaeche fuer ein Objekt
-   * @param pObject
-   */
-  public GUI(Object pObject) {
-    super();
-    String className = pObject.getClass().getName();
-    String classNameWithoutPackage = className;
-    if(className.contains(".")) {
-    	String[] splits = className.split("[\\.]");
-    	classNameWithoutPackage = splits[splits.length-1];
+	/**
+	 * Name der Variablen aus Configuration.java, deren Wert mit dem Slider angepasst werden kann.
+	 */
+    private String configurationWaitingTimeVariable;
+    
+    public GUI(Object pObject) {
+        super();
+        dasObjekt = pObject;
+        labelVector = new Vector<>();
+        methodeInAusfuehrung = false;
+        initGUI();
+        alleGUIs.addElement(this);
     }
-    System.out.println("*** Klasse "+classNameWithoutPackage+" ***");
-    dasObjekt = pObject;
-    labelVector = new Vector<SchriftgroessenLabel>();
-    methodeInAusfuehrung = false;
-    initGUI();
-    alleGUIs.addElement(this);
-  }
 
-  private void initGUI() {
-    try {
-      BoxLayout thisLayout = new BoxLayout(getContentPane(), javax.swing.BoxLayout.Y_AXIS);
-      getContentPane().setLayout(thisLayout);
-      setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
-      getContentPane().setBackground(Color.white);
-
-      // Klassenname
-      klassenNameMitPackage = dasObjekt.getClass().getName();
-      String klassenName = this.packageBezeichnungEntfernen(klassenNameMitPackage);
-      String classNameForLabel = "public class "+klassenName;
-      SchriftgroessenLabel classNameLabel = new SchriftgroessenLabel(classNameForLabel);
-      this.getContentPane().add(classNameLabel);
-      SchriftgroessenLabel linieLabel1 = new SchriftgroessenLabel(linie);
-      this.getContentPane().add(linieLabel1);
-
-      // Attribute
-      fields = dasObjekt.getClass().getDeclaredFields();
-
-      this.fieldLabels = new SchriftgroessenLabel[fields.length];
-
-      for(int i=0; i<fields.length; i++){
-        fields[i].setAccessible(true);
-        fieldLabels[i] = new SchriftgroessenLabel("---");
-        this.getContentPane().add(fieldLabels[i]);
-      }
-      attributeUpdaten();
-
-      SchriftgroessenLabel linieLabel2 = new SchriftgroessenLabel(linie);
-      this.getContentPane().add(linieLabel2);
-
-      // Konstruktor
-      Constructor<?>[] constructors = dasObjekt.getClass().getDeclaredConstructors();
-      for(Constructor<?> constructor:constructors){
-        String constructorSignatur = this.methodenSignaturVereinfachen(constructor.toGenericString());
-        SchriftgroessenLabel constructorLabel = new SchriftgroessenLabel(constructorSignatur);
-        this.getContentPane().add(constructorLabel);
-      }
-
-      // Methoden
-      Method[] methods = dasObjekt.getClass().getDeclaredMethods();
-      Vector<MethodLabel> methodLabelVector = new Vector<MethodLabel>();
-      // methodLabels erzeugen und in einem Vector speichern
-      for(Method method:methods){
-        method.setAccessible(true);
-        MethodLabel methodLabel = new MethodLabel(method);
-        methodLabelVector.add(methodLabel);
-      }
-      // die MethodLabels (alphabetisch!) sortieren
-      java.util.Collections.sort(methodLabelVector);
-      // die MethodLabels anzeigen
-      for(MethodLabel methodLabel:methodLabelVector){
-        this.getContentPane().add(methodLabel);
-      }
-      schriftgroesseSetzen(fontSize);
-      pack();
-      this.setLocation(xPosition, yPosition);
-      xPosition += (this.getWidth() + 10);
-      setVisible(true);
-      this.addWindowListener(new WindowAdapter() {
-        public void windowClosing(WindowEvent evt) {
-          System.exit(0);
-        }
-      });
-
-      this.addWindowFocusListener(new WindowFocusListener(){
-        // wenn das Fenster angeklickt wird,
-        // dann werden die Attribute aktualisiert.
-        public void windowGainedFocus(WindowEvent arg0) {
-          attributeMeineUpdaten();
-        }
-
-        @Override
-        public void windowLostFocus(WindowEvent arg0) {
-          // TODO Auto-generated method stub
-
-        }
-
-      });
-
-      // KeyListener
-      this.addKeyListener(new KeyListener(){
-
-        public void keyPressed(KeyEvent arg0) {}
-
-        public void keyReleased(KeyEvent arg0) {
-          // STRG+ abfragen
-          if(arg0.getKeyCode() == 521 && arg0.getModifiers() == 2){
-            fontSize++;
-            schriftgroesseSetzen(fontSize);
-
-          }
-          // STRG- abfragen
-          else if(arg0.getKeyCode() == 45 && arg0.getModifiers() == 2){
-            fontSize--;
-            schriftgroesseSetzen(fontSize);
-          }
-        }
-
-        public void keyTyped(KeyEvent arg0) {
-        }
-
-      });
-    } catch (Exception e) {
-      e.printStackTrace();
+    /**
+     * erzeugt eine GUI fuer ein Objekt und zeigt einen Slider für die Variable aus Configuration.java an.
+     * @param pObject
+     * @param configurationWaitingTimeVariable die Variable aus Configuration.java, die im Slider angezeigt wird und veraendert werden kann.
+     */
+    public GUI(Object pObject, String configurationWaitingTimeVariable) {
+        super();
+        this.configurationWaitingTimeVariable = configurationWaitingTimeVariable;
+        dasObjekt = pObject;
+        labelVector = new Vector<>();
+        methodeInAusfuehrung = false;
+        initGUI();
+        initSpeedSlider();
+        alleGUIs.addElement(this);
     }
-  }
+
+    private void initGUI() {
+        Configuration.READ_AND_START_UPDATING_CONFIGURATION();
+    	if(xPositionFirst == -1) {
+    		xPositionFirst = Configuration.GUI_POS_X;
+    		xPosition = Configuration.GUI_POS_X;
+    		yPosition = Configuration.GUI_POS_Y;
+    	}
+        try {
+            BoxLayout thisLayout = new BoxLayout(getContentPane(), javax.swing.BoxLayout.Y_AXIS);
+            getContentPane().setLayout(thisLayout);
+            setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+            getContentPane().setBackground(Color.white);
+
+            klassenNameMitPackage = dasObjekt.getClass().getName();
+            String klassenName = this.packageBezeichnungEntfernen(klassenNameMitPackage);
+            String classNameForLabel = "public class " + klassenName;
+            SchriftgroessenLabel classNameLabel = new SchriftgroessenLabel(classNameForLabel);
+            this.getContentPane().add(classNameLabel);
+            SchriftgroessenLabel linieLabel1 = new SchriftgroessenLabel(linie);
+            this.getContentPane().add(linieLabel1);
+
+            fields = dasObjekt.getClass().getDeclaredFields();
+
+            this.fieldLabels = new SchriftgroessenLabel[fields.length];
+
+            for (int i = 0; i < fields.length; i++) {
+                fields[i].setAccessible(true);
+                fieldLabels[i] = new SchriftgroessenLabel("---");
+                this.getContentPane().add(fieldLabels[i]);
+            }
+            attributeUpdaten();
+
+            SchriftgroessenLabel linieLabel2 = new SchriftgroessenLabel(linie);
+            this.getContentPane().add(linieLabel2);
+
+            Constructor<?>[] constructors = dasObjekt.getClass().getDeclaredConstructors();
+            for (Constructor<?> constructor : constructors) {
+                String constructorSignatur = this.methodenSignaturVereinfachen(constructor.toGenericString());
+                SchriftgroessenLabel constructorLabel = new SchriftgroessenLabel(constructorSignatur);
+                this.getContentPane().add(constructorLabel);
+            }
+
+            Method[] methods = dasObjekt.getClass().getDeclaredMethods();
+            Vector<MethodLabel> methodLabelVector = new Vector<>();
+            for (Method method : methods) {
+                method.setAccessible(true);
+                MethodLabel methodLabel = new MethodLabel(method);
+                methodLabelVector.add(methodLabel);
+            }
+            java.util.Collections.sort(methodLabelVector);
+            for (MethodLabel methodLabel : methodLabelVector) {
+                this.getContentPane().add(methodLabel);
+            }
+
+            schriftgroesseSetzen(Configuration.FONT_SIZE);
+            pack();
+
+            this.setLocation(xPosition, yPosition);
+            xPosition += (this.getWidth() + 10);
+            setVisible(true);
+            this.addWindowListener(new WindowAdapter() {
+                public void windowClosing(WindowEvent evt) {
+                    System.exit(0);
+                }
+            });
+
+            this.addWindowFocusListener(new WindowFocusListener() {
+                public void windowGainedFocus(WindowEvent arg0) {
+                    attributeMeineUpdaten();
+                }
+
+                @Override
+                public void windowLostFocus(WindowEvent arg0) {
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+     // Inside your JFrame or main panel setup
+        InputMap inputMap = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = this.getRootPane().getActionMap();
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, InputEvent.CTRL_DOWN_MASK), "increaseFont");
+        actionMap.put("increaseFont", new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+            public void actionPerformed(ActionEvent e) {
+				Configuration.FONT_SIZE++;
+                schriftgroesseSetzen(Configuration.FONT_SIZE);
+            }
+        });
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, InputEvent.CTRL_DOWN_MASK), "decreaseFont");
+        actionMap.put("decreaseFont", new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+            public void actionPerformed(ActionEvent e) {
+				Configuration.FONT_SIZE--;
+                schriftgroesseSetzen(Configuration.FONT_SIZE);
+            }
+        });
+        
+	    this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentMoved(ComponentEvent e) {
+            	// nur die Position der ersten GUI wird in Configuration gespeichert.
+            	GUI firstGUI = alleGUIs.get(0);
+            	GUI currentGUI = GUI.this;
+            	if(firstGUI == currentGUI) {
+	                Configuration.GUI_POS_X = getLocation().x;
+	                Configuration.GUI_POS_Y = getLocation().y;          	
+            	}
+            }
+        });			
+
+
+    }
+
+    private void initSpeedSlider() {
+    	int wartezeit = 50;  
+    	try {
+    	        // Use reflection to update the specified static field in Configuration
+    	        Field configField = Configuration.class.getDeclaredField(configurationWaitingTimeVariable);
+    	        configField.setAccessible(true);
+    	        wartezeit = configField.getInt(null);
+    	    } catch (Exception ex) {
+    	        ex.printStackTrace();
+    	    }    	
+        speedSlider = new JSlider(0, Configuration.MAX_WARTEZEIT, Configuration.MAX_WARTEZEIT - wartezeit);
+        speedSlider.setPreferredSize(new Dimension(WARTEZEITSLIDER_PREFERRED_WIDTH, speedSlider.getPreferredSize().height));
+        speedSlider.addChangeListener(e -> {
+            int newSpeed = speedSlider.getValue();
+            updateWartezeit(Configuration.MAX_WARTEZEIT- newSpeed);
+        });
+
+        JPanel sliderPanel = new JPanel();
+        sliderPanel.setLayout(new BorderLayout());
+        sliderPanel.add(speedSlider, BorderLayout.CENTER);
+
+        this.getContentPane().add(sliderPanel);
+        this.pack(); // Ensure the JFrame resizes to fit the slider
+    }
+
+    private void updateWartezeit(int neueWartezeit) {
+	  try {
+	        // Use reflection to update the specified static field in Configuration
+	        Field configField = Configuration.class.getDeclaredField(configurationWaitingTimeVariable);
+	        configField.setAccessible(true);
+	        configField.setInt(null, neueWartezeit); // Update static field
+	        // falls die Wartezeit bei Baeumen oder Graphen geaendert wird
+	        // dann auch die lineare Wartezeit veraendern.
+	        if(configurationWaitingTimeVariable.equals("WARTEZEIT_BAEUME") ||
+	        		configurationWaitingTimeVariable.equals("WARTEZEIT_GRAPH")) {
+		        configField = Configuration.class.getDeclaredField("WARTEZEIT_LINEAR");
+		        configField.setAccessible(true);
+		        configField.setInt(null, neueWartezeit); // Update static field	        	
+	        }
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	    }    
+	  }
+
 
   /**
    * setzt die Schriftgroesse aller Label auf pFontSize
@@ -698,8 +766,7 @@ public class GUI extends JFrame {
     	
     	// KB: neue Implementierung: 
     	// Pass the object and the parameters array directly to invoke
-    	result = myMethod.invoke(GUI.this.dasObjekt, parameters);
-    	if(result == null){
+    	result = myMethod.invoke(GUI.this.dasObjekt, parameters);        if(result == null){
           if(myMethod.getReturnType().toString().equals("void")){
             result = "void";
           }

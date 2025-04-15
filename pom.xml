@@ -36,7 +36,7 @@
 
     <dependencies>
         <!-- Beispiel: lokale JARs im Ordner libraries -->
-        <!-- Eine JAR eintragen: -->
+        <!-- Eine JAR eintragen -->
 <!--
         <dependency>
             <groupId>local</groupId>

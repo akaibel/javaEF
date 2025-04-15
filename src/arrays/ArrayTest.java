@@ -59,7 +59,6 @@ public class ArrayTest {
 	
 	/**
 	 * Alle Werte sollen um 1000 erhoeht werden.
-	 * @param index
 	 */
 	public void erhoeheAlleWerteUm1000() {
 		ArrayViewer.zeigeArray(zahlen, 0, "vorher");

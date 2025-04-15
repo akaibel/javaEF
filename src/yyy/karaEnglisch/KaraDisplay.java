@@ -1,4 +1,4 @@
-package yyy.karaDeutsch;
+package yyy.karaEnglisch;
 
 import java.awt.Image;
 import java.util.HashMap;
@@ -9,14 +9,13 @@ import javax.swing.ImageIcon;
 import yyy.AbstractDisplay;
 
 public class KaraDisplay extends AbstractDisplay {
-	public static String IMAGE_PATH = "images\\kara\\";
-
+	public static String IMAGE_PATH = "resources\\images\\kara\\";
+	
 	public static final char ACTOR = 'k';
-	public static final  char OBSTACLE = 'x';
-	public static final  char OBJECT_A = 'b';
-	public static final  char OBJECT_B = 'p';
-	public static final  char EMPTY = '.';
-		
+	public static final char OBSTACLE = 'x';
+	public static final char OBJECT_A = 'l';
+	public static final char OBJECT_B = 'm';
+	public static final char EMPTY = '.';
 	
     public static final ImageIcon KARA_ICON = new ImageIcon(IMAGE_PATH+"kara.png");
     public static final ImageIcon KARA_ICON_BLUE = new ImageIcon(IMAGE_PATH+"kara_blue.png");
@@ -26,17 +25,22 @@ public class KaraDisplay extends AbstractDisplay {
     public static final ImageIcon FIELD_ICON = new ImageIcon(IMAGE_PATH+"field.png");
 
     public static final Image FIELD_IMAGE = FIELD_ICON.getImage();
-    
-    private static final String[] KARA_COLORS = {"rot", "blau", "lila", "gelb", "grau"};
+   
+    private static final String[] KARA_COLORS = {"red", "blue", "purple", "yellow"};
     // gray is not a color that should appear in changeColor()
-    
+
+	@Override
+	public String[] actorColors() {
+		return KARA_COLORS;
+	}
+
     private static final Map<String, Image> KARA_IMAGE_MAP = new HashMap<>();
     static {
-    	KARA_IMAGE_MAP.put("rot", KARA_ICON.getImage());
-    	KARA_IMAGE_MAP.put("blau", KARA_ICON_BLUE.getImage());
-    	KARA_IMAGE_MAP.put("lila", KARA_ICON_PURPLE.getImage());
-    	KARA_IMAGE_MAP.put("gelb", KARA_ICON_YELLOW.getImage());
-    	KARA_IMAGE_MAP.put("grau", KARA_ICON_GRAY.getImage());
+    	KARA_IMAGE_MAP.put("red", KARA_ICON.getImage());
+    	KARA_IMAGE_MAP.put("blue", KARA_ICON_BLUE.getImage());
+    	KARA_IMAGE_MAP.put("purple", KARA_ICON_PURPLE.getImage());
+    	KARA_IMAGE_MAP.put("gray", KARA_ICON_GRAY.getImage());
+    	KARA_IMAGE_MAP.put("yellow", KARA_ICON_YELLOW.getImage());
     }
 
   private static final Map<Character, Image> OBJECT_IMAGE_MAP = new HashMap<>();
@@ -59,11 +63,6 @@ public class KaraDisplay extends AbstractDisplay {
 	public Map<String, Image> actorImageMap() {		
 		return KaraDisplay.KARA_IMAGE_MAP;
 	}
-	
-	@Override
-	public String[] actorColors() {
-		return KARA_COLORS;
-	}	
 
 	@Override
 	public Map<Character, Image> objectImageMap() {
@@ -102,27 +101,29 @@ public class KaraDisplay extends AbstractDisplay {
 	}
 
 	@Override
-	public char actor() {
-		return ACTOR;
-	}
-
-	@Override
 	public char objectC() {
 		// doesn't exist in kara
 		return 0;
+	}
+
+	
+	@Override
+	public char actor() {
+		return ACTOR;
 	}
 
 	@Override
 	public String objectName(char object) {
 		switch(object) {
 			case ACTOR: return "Kara";
-			case EMPTY: return "Feld";
-			case OBJECT_A: return "Blatt";
-			case OBJECT_B: return "Pilz";
-			case OBSTACLE: return "Baum";
-			default: return "Unbekanntes Objekt";
+			case EMPTY: return "Field";
+			case OBJECT_A: return "Leaf";
+			case OBJECT_B: return "Mushroom";
+			case OBSTACLE: return "Tree";
+			default: return "unknown Object";
 		}
 	}
+
 
 
 }

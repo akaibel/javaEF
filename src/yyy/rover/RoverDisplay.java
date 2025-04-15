@@ -9,7 +9,7 @@ import javax.swing.ImageIcon;
 import yyy.AbstractDisplay;
 
 public class RoverDisplay extends AbstractDisplay {
-	public static String IMAGE_PATH = "images\\rover\\";
+	public static String IMAGE_PATH = "resources\\images\\rover\\";
 
 	public static final char ACTOR = 'a';
 	public static final char OBSTACLE = 'x';  // Huegel

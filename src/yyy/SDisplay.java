@@ -77,7 +77,6 @@ public class SDisplay {
 	
     
     public SDisplay(SProgrammContainer programmContainer) {
-    	_config.Configuration.READ_AND_START_UPDATING_CONFIGURATION();
     	this.configuration = programmContainer.getProgram().configuration();
     	programmContainer.setDisplay(this);
     	initLogic(programmContainer);
@@ -115,7 +114,8 @@ public class SDisplay {
      */
     public void initGUI() {
 		this.waitingTime = 500;
-    	
+    	_config.Configuration.READ_AND_START_UPDATING_CONFIGURATION();
+    	FRAME_LOCATION = new Point(_config.Configuration.KARA_ROVER_WINDOW_POS_X,_config.Configuration.KARA_ROVER_WINDOW_POS_Y);
 		// initGuiLatch will be released, 
 		// as soon as the GUI is ready.
         initGuiLatch = new CountDownLatch(1); 
@@ -187,6 +187,8 @@ public class SDisplay {
 	            @Override
 	            public void componentMoved(ComponentEvent e) {
 	                FRAME_LOCATION = frame.getLocation();
+	                _config.Configuration.KARA_ROVER_WINDOW_POS_X = FRAME_LOCATION.x;
+	                _config.Configuration.KARA_ROVER_WINDOW_POS_Y = FRAME_LOCATION.y;
 	            }
 	        });	        
 	        // needed to handle deiconifying the window.

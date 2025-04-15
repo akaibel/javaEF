@@ -35,7 +35,7 @@ public class Configuration {
 	/**
 	 * die Geschwindigkeit
 	 */
-	public static int SPEED = 50;
+	public static int SPEED = 30;
 	
 	/**
 	 * die Schriftgroesse in den grafischen Oberflaechen
@@ -45,17 +45,21 @@ public class Configuration {
 	/**
 	 * die Position des ersten GUI Objektes
 	 */
-	public static int GUI_POS_X = 100;
-	public static int GUI_POS_Y = 300;
+	public static int GUI_POS_X = 30;
+	public static int GUI_POS_Y = 450;
 	
-	public static int OOP_LEINWAND_BREITE = 600;
-	public static int OOP_LEINWAND_HOEHE = 400;
+	public static int OOP_LEINWAND_BREITE = 300;
+	public static int OOP_LEINWAND_HOEHE = 300;
 	public static int OOP_FORMEN_FUELLEN = 1;
 	public static int OOP_WARTEZEIT_FORMEN = 20;
 	public static int OOP_GRAFIK_UPDATE_IN_MS = 20;
 
-	public static int OOP_LEINWAND_POS_X = 10;
-	public static int OOP_LEINWAND_POS_Y = 10;
+	public static int OOP_LEINWAND_POS_X = 30;
+	public static int OOP_LEINWAND_POS_Y = 140;
+
+	public static int KARA_ROVER_WINDOW_POS_X = 40;
+	public static int KARA_ROVER_WINDOW_POS_Y = 270;
+	
 
 
 	/**
@@ -101,6 +105,13 @@ public class Configuration {
 		File file = new File(CONFIG_FILE);
 		if (!file.exists()) {
 			try {
+		        File parentDir = file.getParentFile();
+		        if (parentDir != null && !parentDir.exists()) {
+		            boolean dirsCreated = parentDir.mkdirs();
+		            if (dirsCreated) {
+		                System.err.println("Configuration.java: Created folder(s): "+parentDir.getPath());
+		            }
+		        }				
 				boolean created = file.createNewFile();
 				if (created) {
 					System.err.println("Configuration.java: Created file: " + CONFIG_FILE);

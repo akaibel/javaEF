@@ -8,9 +8,12 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import javax.swing.JOptionPane;
 
 /**
  * Die Wartezeiten koennen vom User angepasst werden.
@@ -101,6 +104,7 @@ public class Configuration {
 		}, 2, 2, TimeUnit.SECONDS); // Initial delay of 2 seconds, then 2-second interval
 	}
 
+
 	private static void CREATE_CONFIG_FILE_IF_DOESNT_EXIST() {
 		File file = new File(CONFIG_FILE);
 		if (!file.exists()) {
@@ -131,12 +135,13 @@ public class Configuration {
 		}
 	}
 
+
 	/**
 	 * schreibt die Werte von allen Variablen dieser Klasse in CONFIG_FILE
 	 */
 	public static void SAVE_PROPERTIES() {
 		// properties aus den Variablen sammeln
-		Map<String,String> propertiesFromVariables = new HashMap<>();
+		Map<String,String> propertiesFromVariables = new TreeMap<>();
 		for (Field field : Configuration.class.getDeclaredFields()) {
 			// Check if the field is static
 			if (Modifier.isStatic(field.getModifiers())) {
@@ -154,5 +159,25 @@ public class Configuration {
 		// jetzt die properties schreiben.
 		Properties.saveProperties(propertiesFromVariables, CONFIG_FILE);
 	}
+	
+	public static void main(String[] args) {
+        // Show a yes-no dialog
+        int response = JOptionPane.showConfirmDialog(
+                null, 
+                "configuration.txt auf Startwerte setzen?", 
+                "Configuration", 
+                JOptionPane.YES_NO_OPTION
+        );
+
+        // Check the user's response
+        if (response == JOptionPane.YES_OPTION) {
+            // Call the SAVE_PROPERTIES method
+            Configuration.SAVE_PROPERTIES();
+    		Properties.printPropertiesFile(CONFIG_FILE);
+        } else {
+            // Do nothing if "No" is selected
+            System.out.println("Configuration reset canceled.");
+        }
+    }
 
 }

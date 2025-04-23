@@ -1,4 +1,4 @@
-# javaQ1Q2
+# javaEF
 
 Dieses Projekt bietet Programmiervorlagen für den Informatikunterricht in der EF in NRW.
 Dafür wurden Kara, Rover und Formen (Kreis, Dreieck, Quadrat) in ein Projekt integriert, das die Schüler:innen die ganze EF begleiten kann. 

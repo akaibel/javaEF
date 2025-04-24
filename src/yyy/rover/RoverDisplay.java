@@ -20,7 +20,7 @@ public class RoverDisplay extends AbstractDisplay {
 		
 	
     public static final ImageIcon ROVER_ICON = new ImageIcon(IMAGE_PATH+"rover.png");
-    public static final ImageIcon ROVER_ICON_GRAU = new ImageIcon(IMAGE_PATH+"roverKlasse.png");
+    public static final ImageIcon ROVER_ICON_GRAU = new ImageIcon(IMAGE_PATH+"roverGrau.png");
     public static final ImageIcon FIELD_ICON = new ImageIcon(IMAGE_PATH+"boden.png");
 
     public static final Image FIELD_IMAGE = FIELD_ICON.getImage();

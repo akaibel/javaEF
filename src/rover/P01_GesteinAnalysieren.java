@@ -37,6 +37,7 @@ public class P01_GesteinAnalysieren extends RoverProgramm{
 		while(rover.huegelVorhanden("vorne") == false) {
 			if(rover.gesteinVorhanden() == true) {
 				rover.analysiereGestein();
+				rover.setzeMarke();
 			}
 			rover.fahre();
 		}

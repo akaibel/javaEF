@@ -18,7 +18,7 @@ package gui;
  * You should have received a copy of the GNU General Public License
  * along with javaEF. If not, see <https://www.gnu.org/licenses/>.
  * 
- * Copyright (C) 2025 Andreas Kaibel
+ * Copyright (C) 2025 Andreas Kaibel  a.kaibel@googlemail.com
  */
 import java.awt.BorderLayout;
 import java.awt.Color;

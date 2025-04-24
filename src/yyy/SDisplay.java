@@ -347,7 +347,9 @@ public class SDisplay {
                 int cy = getHeight() / 2;
                 AffineTransform at = AffineTransform.getRotateInstance(Math.toRadians(rotation), cx, cy);
                 g2d.setTransform(at);
-                g2d.drawImage(actorImage, 0, 0, getWidth(), getHeight(), this);
+                // offsetXY ist der Abstand von der oberen linken Ecke 
+                int offsetXY = configuration.cellSize()/10;
+                g2d.drawImage(actorImage, offsetXY, offsetXY, getWidth()+offsetXY, getHeight()+offsetXY, this);
                 g2d.dispose();
             }
         }

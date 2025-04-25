@@ -27,7 +27,13 @@ import javax.swing.SwingUtilities;
 
 public class SDisplay {
 	private AbstractDisplay configuration;
-	    
+	
+	/**
+	 * to avoid displaying the actor before the method displayActor is called
+	 */
+	private boolean displayActorCalled;
+	   
+	private boolean displayActorAfterReset;
     /**
      * here the images of each cell are stored.
      */
@@ -77,6 +83,9 @@ public class SDisplay {
 	
     
     public SDisplay(SProgrammContainer programmContainer) {
+    	//System.out.println("SDisplay()");
+    	this.displayActorCalled = false;
+    	this.displayActorAfterReset = true;
     	this.configuration = programmContainer.getProgram().configuration();
     	programmContainer.setDisplay(this);
     	initLogic(programmContainer);
@@ -220,6 +229,10 @@ public class SDisplay {
         });
     }
     
+    public void setDisplayActorCalled(boolean value) {
+    	this.displayActorCalled = value;
+    }
+    
     private void showActor() {
         // as soon as the frame is ready, display Actor.
         new Thread(() -> {
@@ -256,7 +269,7 @@ public class SDisplay {
     public void startNewProgramThread(){
     	//System.out.println("startNewProgramThread");
     	if(programThread != null) {
-    		System.out.println("SDisplay.startNewProgramThread(): \nprogramThread is not null!\n that should not be!!");
+    		//System.out.println("SDisplay.startNewProgramThread(): \nprogramThread is not null!\n that should not be!!");
     	}
 		programThread = new ProgramThread();
 		programThread.start();
@@ -281,7 +294,7 @@ public class SDisplay {
             for (int col = 0; col < cols; col++) {
                 char obj = objects[row][col];
                 Image overlayImage = configuration.objectImageMap().get(obj);
-                ImageLabel label = new ImageLabel(configuration.backgroundImage(), overlayImage);
+                ImageLabel label = new ImageLabel(configuration.backgroundImage(), overlayImage, row, col);
                 imageLabelGrid[row][col] = label;
                 panel.add(label);
             }
@@ -310,16 +323,18 @@ public class SDisplay {
          */
         private int rotation;
 
+        private int row,col;
         /**
          * creates a new ImageLabel for displaying one cell.
          * Actor is not displayed.
          * @param backgroundPath the path of the background image
          * @param overlayPath the path of the overlay image (tree or leaf)
          */
-        public ImageLabel(Image backgroundImage, Image overlayImage) {
+        public ImageLabel(Image backgroundImage, Image overlayImage, int row, int col) {
             try {
                 this.background = backgroundImage;
                 this.overlay = overlayImage;
+                this.row = row; this.col = col;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -328,6 +343,7 @@ public class SDisplay {
 
         @Override
         protected void paintComponent(Graphics g) {
+        	//System.out.println("paintComponent()");
             super.paintComponent(g);
             if (background != null) {
                 g.drawImage(background, 0, 0, getWidth(), getHeight(), this);
@@ -337,20 +353,31 @@ public class SDisplay {
             }
             // display Actor only in case rotation is not -1.
             if (rotation != -1 && programContainer.getActor() != null) {
-                this.actorImage = configuration.actorImageMap().get(programContainer.getActor().getColor());
-                if(this.actorImage == null) {
-                	System.out.println("actorImage is null");
+            	//display Actor only when displayActor() was called
+            	if (displayActorCalled == true) {
+                	// Workaround
+            		// der Actor wird auf 0 0 falsch dargestellt, wenn er nicht wirklich dort steht!
+            		// deswegen wird der Actor nur auf 0 0 dargestellt, wenn er wirklich dort steht.
+                	// TODO improve workaround
+            		if(!(col == 0 & row==0) || SDisplay.this.programContainer.getActor().getPosition().equals(new SPosition(0,0))) {
+						this.actorImage = configuration.actorImageMap().get(programContainer.getActor().getColor());
+						if (this.actorImage == null) {
+							//System.out.println("actorImage is null");
+						}
+						Graphics2D g2d = (Graphics2D) g.create();
+						//System.out.println("paintComponent: Actor "+this.getX()+","+this.getY()+"):"+rotation);
+						int cx = getWidth() / 2;
+						int cy = getHeight() / 2;
+						AffineTransform at = AffineTransform.getRotateInstance(Math.toRadians(rotation), cx, cy);
+						g2d.setTransform(at);
+						// offsetXY ist der Abstand von der oberen linken Ecke 
+						int offsetXY = configuration.cellSize() / 40;
+						//int offsetXY = 0;
+						g2d.drawImage(actorImage, offsetXY, offsetXY, getWidth() + offsetXY, getHeight() + offsetXY, this);
+						//System.out.println("actor drawn "+displayActorCalled+"; row="+row+"; col="+col+"; cx="+cx+"; cy="+cy+"; offsetXY="+offsetXY);
+						g2d.dispose();
+					}
                 }
-                Graphics2D g2d = (Graphics2D) g.create();
-                //System.out.println("paintComponent: Actor "+this.getX()+","+this.getY()+"):"+rotation);
-                int cx = getWidth() / 2;
-                int cy = getHeight() / 2;
-                AffineTransform at = AffineTransform.getRotateInstance(Math.toRadians(rotation), cx, cy);
-                g2d.setTransform(at);
-                // offsetXY ist der Abstand von der oberen linken Ecke 
-                int offsetXY = configuration.cellSize()/10;
-                g2d.drawImage(actorImage, offsetXY, offsetXY, getWidth()+offsetXY, getHeight()+offsetXY, this);
-                g2d.dispose();
             }
         }
 
@@ -361,6 +388,8 @@ public class SDisplay {
          */
         public void displayActor(int rotation) {
             this.rotation = rotation;
+            //System.out.println("displayActor("+rotation+")");
+        	displayActorCalled = true;
             repaint();
         }
 
@@ -372,7 +401,7 @@ public class SDisplay {
             this.rotation = -1;
             repaint();
         }
-
+        
         /**
          * updates the overlay.
          * @param overlayImage thenew overlay image.
@@ -392,7 +421,7 @@ public class SDisplay {
 			else {
 				this.overlay = null;
 			}
-			repaint();
+			//repaint();
 			
 		}
     }
@@ -438,8 +467,8 @@ public class SDisplay {
 
     /**
      * removes Actor from the given location in the grid.
-     * @param x horizontal
-     * @param y vertical
+     * @param row horizontal
+     * @param col vertical
      */
     private void removeActor(SPosition position) {
     	//System.out.println("removeActor("+x+","+y+")");
@@ -466,8 +495,8 @@ public class SDisplay {
     
     /**
      * updates the display of the cell.
-     * @param x horizontal
-     * @param y vertical
+     * @param row horizontal
+     * @param col vertical
      */
     public void updateCell(SPosition position) {
     	int x = position.getX();
@@ -529,13 +558,15 @@ public class SDisplay {
      * called when reset-Button is pressed.
      */
     public void reset() {
+    	//System.out.println("reset()");
     	programContainer.stop();
     	this.getFrame().setVisible(false);
     	SProgramm newProgram = this.programContainer.getProgram().createNewInstance();
     	//Display the actor - must be done in a seperate Thread
     	Thread displayActorThread = new Thread(() -> {
             try {
-            	//TODO improve this! the actor should be displayed as soon as everything is ready.
+            	//TODO improve this! 
+            	//the actor should be displayed as soon as everything is ready.
             	Thread.sleep(300);
 			} catch (InterruptedException e) {
 				e.printStackTrace();

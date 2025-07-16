@@ -13,7 +13,10 @@ public class Sortieren {
 	public void bubblesort() {
 		System.out.println("bubblesort");
 		ArrayViewer.zeigeArray(zahlen, 0, "unsortiert");
+		Zeitmessung.start();
 		//TODO
+		Zeitmessung.stop();
+		Zeitmessung.ausgeben();
 		ArrayViewer.zeigeArray(zahlen, 1, "sortiert");
 		
 		return;
@@ -23,7 +26,10 @@ public class Sortieren {
 		System.out.println("sortiereDurchEinfuegen");
 		ArrayViewer.zeigeArray(zahlen, 0, "unsortiert");
 		int[] ergebnis = new int[zahlen.length];
+		Zeitmessung.start();
 		//TODO
+		Zeitmessung.stop();
+		Zeitmessung.ausgeben();
 		ArrayViewer.zeigeArray(ergebnis, 1, "sortiert");
 		return ergebnis;
 	}
@@ -32,7 +38,10 @@ public class Sortieren {
 		System.out.println("sortiereDurchEinfuegen");
 		ArrayViewer.zeigeArray(zahlen, 0, "unsortiert");
 		int[] ergebnis = new int[zahlen.length];
+		Zeitmessung.start();
 		//TODO
+		Zeitmessung.stop();
+		Zeitmessung.ausgeben();
 		ArrayViewer.zeigeArray(ergebnis, 1, "sortiert");
 		return ergebnis;
 	}

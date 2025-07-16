@@ -48,5 +48,16 @@ public abstract class SProgramm {
         }
     }
 	
+	protected void warteEndlos() {
+		while(true) {
+			try {
+				Thread.sleep(1000000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 
+	}
+	
 }

@@ -404,7 +404,7 @@ public class SDisplay {
         
         /**
          * updates the overlay.
-         * @param overlayImage thenew overlay image.
+         * @param overlayImage the new overlay image.
          * @param showActor whether Actor should be shown.
          */
 		public void updateOverlay(Image overlayImage, boolean showActor) {
@@ -510,6 +510,7 @@ public class SDisplay {
     	}
     	boolean showActor = (programContainer.getActor().getPosition().equals(position));
     	imageLabelGrid[row][col].updateOverlay(overlayImage, showActor);
+    	imageLabelGrid[row][col].repaint();
     }
     
     /**
